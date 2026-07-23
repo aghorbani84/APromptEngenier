@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>پرامپت‌ساز حرفه‌ای — برای همه مدل‌های هوش مصنوعی</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/vazirmatn@latest/index.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/inter@latest/index.css" />
+<style>
+  :root{
+    --bg:#05070d;
+    --panel:rgba(255,255,255,.045);
+    --panel2:rgba(255,255,255,.02);
+    --border:rgba(255,255,255,.09);
+    --text:#e7edf4;
+    --muted:#8b96a5;
+    --accent:#2AABEE;
+    --accent2:#a78bfa;
+    --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  [hidden]{display:none!important}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:'Vazirmatn','Inter',system-ui,sans-serif;
+    background:var(--bg);color:var(--text);
+    min-height:100vh;overflow-x:hidden;line-height:1.85;
+  }
+  html[lang="en"] body{font-family:'Inter','Vazirmatn',system-ui,sans-serif;line-height:1.65}
+  ::selection{background:color-mix(in srgb,var(--accent) 45%,transparent)}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12);border-radius:8px;border:2px solid var(--bg)}
+  ::-webkit-scrollbar-track{background:transparent}
+
+  .blob{position:fixed;border-radius:50%;filter:blur(130px);z-index:-2;opacity:.26;animation:drift 20s ease-in-out infinite alternate}
+  .b1{width:520px;height:520px;background:var(--accent);top:-160px;right:-140px}
+  .b2{width:460px;height:460px;background:var(--accent2);bottom:-180px;left:-120px;animation-delay:-10s}
+  @keyframes drift{from{transform:translate(0,0) scale(1)}to{transform:translate(-70px,45px) scale(1.15)}}
+  body::before{
+    content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+    background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);
+    background-size:44px 44px;
+    -webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 75%);
+    mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 30%,transparent 75%);
+  }
+
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(5,7,13,.72);border-bottom:1px solid var(--border)}
+  .nav-inner{max-width:1280px;margin:0 auto;padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px}
+  .logo-mark{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));font-size:17px;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 40%,transparent)}
+  .logo .thin{color:var(--muted);font-weight:500}
+  .nav-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .pill{font-size:12px;font-weight:600;padding:6px 12px;border-radius:999px;background:color-mix(in srgb,var(--accent) 15%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,transparent)}
+  .lang-seg{display:flex;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:11px;padding:3px;gap:2px}
+  .lang-seg button{font:inherit;font-size:12px;font-weight:700;color:var(--muted);background:none;border:none;border-radius:8px;padding:5px 13px;cursor:pointer;transition:all .18s}
+  .lang-seg button.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 12px color-mix(in srgb,var(--accent) 35%,transparent)}
+
+  .wrap{max-width:1280px;margin:0 auto;padding:0 24px 60px}
+
+  .hero{padding:46px 0 28px;text-align:center;animation:fadeUp .7s ease both}
+  .hero h1{font-size:clamp(27px,4.2vw,46px);line-height:1.35;font-weight:800}
+  .grad{background:linear-gradient(92deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{margin:14px auto 0;max-width:720px;color:var(--muted);font-size:15.5px}
+  .hero-chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:20px}
+  .hchip{font-size:13px;color:var(--muted);border:1px solid var(--border);background:var(--panel2);padding:7px 14px;border-radius:999px}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+  .workspace{display:grid;grid-template-columns:1fr 440px;gap:22px;align-items:start}
+  .panel{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+  .controls{padding:22px;animation:fadeUp .7s .1s ease both}
+  .preview-panel{position:sticky;top:78px;overflow:hidden;display:flex;flex-direction:column;animation:fadeUp .7s .2s ease both}
+
+  .sec{padding:16px 0;border-bottom:1px dashed var(--border)}
+  .sec:first-child{padding-top:2px}
+  .sec-title{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.04em;color:var(--muted);margin-bottom:13px}
+  .sec-title .hint{margin-inline-start:auto;font-weight:500;opacity:.65;font-size:11px}
+
+  /* models */
+  .model-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .mchip{font:inherit;font-size:11.5px;font-weight:700;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:10px 4px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:5px}
+  .mchip .em{font-size:20px}
+  .mchip:hover{border-color:color-mix(in srgb,var(--accent) 55%,transparent);color:var(--text);transform:translateY(-2px)}
+  .mchip.on{color:#fff;border-color:color-mix(in srgb,var(--accent) 65%,transparent);background:color-mix(in srgb,var(--accent) 16%,transparent);box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 20%,transparent)}
+
+  /* protocols */
+  .proto-list{display:flex;flex-direction:column;gap:9px}
+  .pcard{display:flex;gap:11px;align-items:flex-start;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:12px;padding:12px 13px;cursor:pointer;transition:all .18s;text-align:start;width:100%;font:inherit;color:var(--text)}
+  .pcard:hover{border-color:rgba(255,255,255,.25);transform:translateY(-2px)}
+  .pcard.on{border-color:color-mix(in srgb,var(--accent) 60%,transparent);background:color-mix(in srgb,var(--accent) 13%,transparent);box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 18%,transparent)}
+  .pcard .pic{font-size:22px;line-height:1.3}
+  .pcard .pname{font-size:13px;font-weight:700}
+  .pcard .pdesc{font-size:11.5px;color:var(--muted);line-height:1.75;margin-top:2px}
+  .plaws{font-size:10.5px;font-weight:700;color:var(--accent);margin-top:6px;display:inline-block;background:color-mix(in srgb,var(--accent) 12%,transparent);padding:2px 9px;border-radius:999px}
+
+  /* editor */
+  textarea#rawText{width:100%;background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:12px;color:var(--text);padding:14px;font:inherit;font-size:14px;line-height:2;resize:vertical;min-height:150px;transition:border-color .2s,box-shadow .2s}
+  textarea#rawText:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+  .health{display:flex;align-items:center;gap:10px;margin-top:10px}
+  .hbar{flex:1;height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+  .hbar i{display:block;height:100%;border-radius:999px;width:0%;transition:width .3s,background .3s}
+  .hlabel{font-size:11.5px;color:var(--muted);white-space:nowrap;font-weight:600}
+
+  .preset-row{display:flex;flex-wrap:wrap;gap:8px}
+  .preset{font:inherit;font-size:12px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:999px;padding:6px 13px;cursor:pointer;transition:all .18s}
+  .preset:hover{border-color:color-mix(in srgb,var(--accent) 55%,transparent);color:var(--text);transform:translateY(-1px)}
+
+  /* seg + switches */
+  .opt-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .opt-row .lbl{font-size:12.5px;font-weight:600;color:var(--muted)}
+  .seg{display:inline-flex;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px}
+  .seg button{font:inherit;font-size:11.5px;font-weight:600;color:var(--muted);background:none;border:none;border-radius:8px;padding:5px 12px;cursor:pointer;transition:all .18s;white-space:nowrap}
+  .seg button.active{background:color-mix(in srgb,var(--accent) 22%,transparent);color:#fff}
+
+  .switches{display:grid;grid-template-columns:1fr 1fr;gap:2px 14px}
+  .swrow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-radius:10px;cursor:pointer;transition:background .15s;font-size:12.5px}
+  .swrow:hover{background:rgba(255,255,255,.04)}
+  .swrow input{position:absolute;opacity:0;pointer-events:none}
+  .sw{position:relative;width:36px;height:21px;border-radius:999px;background:rgba(255,255,255,.14);transition:background .25s;flex:none}
+  .sw::after{content:'';position:absolute;top:3px;inset-inline-start:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .25s cubic-bezier(.3,1.4,.6,1)}
+  .swrow input:checked ~ .sw{background:linear-gradient(135deg,var(--accent),var(--accent2))}
+  .swrow input:checked ~ .sw::after{transform:translateX(15px)}
+  html[dir="rtl"] .swrow input:checked ~ .sw::after{transform:translateX(-15px)}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{font:inherit;font-size:12px;font-weight:600;color:var(--muted);background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:999px;padding:6px 13px;cursor:pointer;transition:all .18s}
+  .chip:hover{border-color:color-mix(in srgb,var(--accent) 50%,transparent);color:var(--text);transform:translateY(-1px)}
+  .chip.on{color:#fff;border-color:color-mix(in srgb,var(--accent) 60%,transparent);background:color-mix(in srgb,var(--accent) 18%,transparent)}
+  .img-note{margin-top:12px;font-size:11.5px;color:var(--muted);background:color-mix(in srgb,var(--accent2) 8%,transparent);border:1px solid color-mix(in srgb,var(--accent2) 25%,transparent);border-radius:10px;padding:9px 12px;line-height:1.8}
+
+  .btn{font:inherit;font-size:13px;font-weight:700;border-radius:11px;padding:9px 15px;cursor:pointer;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--text);transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+  .btn:hover{transform:translateY(-1px);border-color:rgba(255,255,255,.22)}
+  .btn:active{transform:translateY(0) scale(.98)}
+  .btn.primary{border:none;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));box-shadow:0 8px 22px color-mix(in srgb,var(--accent) 35%,transparent);position:relative;overflow:hidden}
+  .btn.primary::after{content:'';position:absolute;top:0;inset-inline-start:-80%;width:50%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:inset-inline-start .5s}
+  .btn.primary:hover::after{inset-inline-start:130%}
+
+  /* preview */
+  .pv-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,.25);flex-wrap:wrap}
+  .pv-head .lbl{font-size:12px;font-weight:700;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#3fb950}
+  .live i{width:7px;height:7px;border-radius:50%;background:#3fb950;animation:pulse 1.6s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(63,185,80,.5)}50%{box-shadow:0 0 0 6px rgba(63,185,80,0)}}
+  .pv-actions{display:flex;gap:8px}
+  .pv-scroll{overflow:auto;max-height:calc(100vh - 190px);min-height:300px}
+  pre#outPre{font-family:inherit;font-size:13px;line-height:2;color:#c9d6e4;background:transparent;margin:0;padding:20px 22px;white-space:pre-wrap;word-break:break-word;text-align:start}
+  .statusbar{display:flex;justify-content:space-between;gap:10px;padding:9px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);background:rgba(0,0,0,.25);flex-wrap:wrap}
+  .statusbar b{color:var(--text);font-weight:700}
+
+  .tips{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+  .tip-card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;animation:fadeUp .7s .3s ease both}
+  .tip-card .ic{font-size:22px;margin-bottom:8px}
+  .tip-card h4{font-size:14px;font-weight:700;margin-bottom:6px}
+  .tip-card p{font-size:12.5px;color:var(--muted);line-height:1.85}
+
+  .foot{text-align:center;color:var(--muted);font-size:13px;padding:30px 0 8px}
+  .foot b{color:var(--text)}
+
+  #toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,90px);background:#10151d;border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);color:var(--text);padding:13px 22px;border-radius:14px;font-size:14px;font-weight:600;opacity:0;transition:all .4s cubic-bezier(.2,.9,.3,1.15);z-index:99;box-shadow:0 16px 50px rgba(0,0,0,.55);pointer-events:none;max-width:90vw;text-align:center}
+  #toast.show{transform:translate(-50%,0);opacity:1}
+
+  @media(max-width:1024px){
+    .workspace{grid-template-columns:1fr}
+    .preview-panel{position:static;order:-1}
+    .pv-scroll{max-height:none}
+  }
+  @media(max-width:600px){
+    .model-grid{grid-template-columns:repeat(4,1fr)}
+    .switches{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="blob b1"></div>
+<div class="blob b2"></div>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="logo">
+      <span class="logo-mark">🧠</span>
+      <span><span data-i18n="brand">پرامپت‌ساز</span> <span class="thin" data-i18n="brandThin">حرفه‌ای</span></span>
+    </div>
+    <div class="nav-right">
+      <div class="lang-seg">
+        <button type="button" id="langFa" class="active">فارسی</button>
+        <button type="button" id="langEn">English</button>
+      </div>
+      <span class="pill" data-i18n="pill1">⚡ نسخه ۱.۰</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <h1><span data-i18n="heroA">پرامپت‌هات رو به سطح</span> <span class="grad" data-i18n="heroB">مهندس Principal</span> <span data-i18n="heroC">ارتقا بده</span></h1>
+    <p data-i18n="heroP">پرامپت خامت رو بنویس، پروتکل رفتاری و مدل مقصد رو انتخاب کن — خروجی، یک پرامپت مهندسی‌شده و آماده کپی برای ChatGPT، Claude، Gemini و بقیه است.</p>
+    <div class="hero-chips">
+      <span class="hchip" data-i18n="hc1">📜 ۵ پروتکل تخصصی</span>
+      <span class="hchip" data-i18n="hc2">🤖 ۸ مدل مقصد</span>
+      <span class="hchip" data-i18n="hc3">🎨 حالت تصویرساز</span>
+      <span class="hchip" data-i18n="hc4">📊 سنجش کیفیت پرامپت</span>
+    </div>
+  </section>
+
+  <section class="workspace">
+
+    <!-- ============ CONTROLS ============ -->
+    <aside class="panel controls">
+
+      <div class="sec">
+        <h3 class="sec-title"><span>🤖</span><span data-i18n="secModel">مدل مقصد</span><span class="hint" data-i18n="modelHint">خروجی با فرمت بهینه همان مدل ساخته می‌شود</span></h3>
+        <div class="model-grid" id="modelGrid"></div>
+      </div>
+
+      <div class="sec" id="protoSec">
+        <h3 class="sec-title"><span>📜</span><span data-i18n="secProtocol">پروتکل رفتاری</span><span class="hint" data-i18n="protocolHint">قوانینی که هوش مصنوعی باید رعایت کند</span></h3>
+        <div class="proto-list" id="protoList"></div>
+      </div>
+
+      <div class="sec">
+        <h3 class="sec-title"><span>✏️</span><span data-i18n="secPrompt">پرامپت خام شما</span></h3>
+        <textarea id="rawText" dir="auto" spellcheck="false" data-i18n-ph="promptPh" placeholder="درخواستت رو اینجا بنویس..."></textarea>
+        <div class="health">
+          <span class="hbar" id="healthBar"><i></i></span>
+          <span class="hlabel" id="healthLabel"></span>
+        </div>
+      </div>
+
+      <div class="sec">
+        <h3 class="sec-title"><span>💡</span><span data-i18n="secPresets">نمونه‌های آماده</span></h3>
+        <div class="preset-row" id="presetRow"></div>
+      </div>
+
+      <div class="sec" id="textOptsSec">
+        <h3 class="sec-title"><span>⚙️</span><span data-i18n="secOptions">گزینه‌های خروجی</span></h3>
+        <div class="opt-row">
+          <span class="lbl" data-i18n="respLang">زبان پاسخ هوش مصنوعی</span>
+          <div class="seg" id="respSeg">
+            <button type="button" data-val="auto" data-i18n="rAuto">تشخیص خودکار</button>
+            <button type="button" data-val="fa" data-i18n="rFa">فارسی</button>
+            <button type="button" data-val="en" data-i18n="rEn">English</button>
+          </div>
+        </div>
+        <div class="opt-row">
+          <span class="lbl" data-i18n="length">طول پاسخ</span>
+          <div class="seg" id="lenSeg">
+            <button type="button" data-val="short" data-i18n="lShort">کوتاه</button>
+            <button type="button" data-val="medium" data-i18n="lMed">متوسط</button>
+            <button type="button" data-val="long" data-i18n="lLong">جامع</button>
+          </div>
+        </div>
+        <div class="switches">
+          <label class="swrow"><span data-i18n="oStep">استدلال گام‌به‌گام</span><input type="checkbox" data-opt="step" checked /><span class="sw"></span></label>
+          <label class="swrow"><span data-i18n="oAsk">اول سوال بپرس</span><input type="checkbox" data-opt="ask" /><span class="sw"></span></label>
+          <label class="swrow"><span data-i18n="oEx">درخواست مثال</span><input type="checkbox" data-opt="ex" /><span class="sw"></span></label>
+          <label class="swrow"><span data-i18n="oNoFluff">بدون حاشیه</span><input type="checkbox" data-opt="nofluff" checked /><span class="sw"></span></label>
+          <label class="swrow"><span data-i18n="oCode">کد در code block</span><input type="checkbox" data-opt="code" checked /><span class="sw"></span></label>
+        </div>
+      </div>
+
+      <div class="sec" id="imgSec" hidden>
+        <h3 class="sec-title"><span>🎨</span><span data-i18n="secImage">تنظیمات تصویر</span></h3>
+        <div class="opt-row"><span class="lbl" data-i18n="imgStyle">سبک هنری</span></div>
+        <div class="chips" id="styleChips"></div>
+        <div class="opt-row" style="margin-top:14px"><span class="lbl" data-i18n="imgLight">نورپردازی</span></div>
+        <div class="chips" id="lightChips"></div>
+        <div class="opt-row" style="margin-top:14px"><span class="lbl" data-i18n="imgAr">نسبت تصویر</span></div>
+        <div class="chips" id="arChips"></div>
+        <div class="opt-row" style="margin-top:14px"><span class="lbl" data-i18n="imgParam">نسخه مدل</span></div>
+        <div class="chips" id="verChips"></div>
+        <div class="img-note" data-i18n="imgNote">💡 پرامپت تصویر همیشه به انگلیسی ساخته می‌شود — مدل‌های تصویری با انگلیسی بهترین نتیجه را می‌دهند.</div>
+      </div>
+
+    </aside>
+
+    <!-- ============ PREVIEW ============ -->
+    <section class="panel preview-panel">
+      <div class="pv-head">
+        <span class="lbl">🧾 <span data-i18n="pvTitle">پرامپت نهایی</span> <span class="live"><i></i></span></span>
+        <div class="pv-actions">
+          <button class="btn" id="dlBtn" type="button" data-i18n="dl">⬇ دانلود TXT</button>
+          <button class="btn primary" id="copyBtn" type="button" data-i18n="copy">📋 کپی</button>
+        </div>
+      </div>
+      <div class="pv-scroll">
+        <pre id="outPre" dir="auto"></pre>
+      </div>
+      <div class="statusbar"><span id="statLine"></span><span data-i18n="ready">آماده کپی در System Prompt یا چت ✅</span></div>
+    </section>
+
+  </section>
+
+  <section class="tips">
+    <div class="tip-card"><div class="ic">🎯</div><h4 data-i18n="tip1t">قانون ۵W</h4><p data-i18n="tip1p">در پرامپت خام مشخص کن: چه چیزی، چرا، برای چه کسی، با چه محدودیتی و چه خروجی‌ای می‌خواهی.</p></div>
+    <div class="tip-card"><div class="ic">✂️</div><h4 data-i18n="tip2t">یک کار در هر پرامپت</h4><p data-i18n="tip2p">به جای ۵ درخواست در یک پرامپت، هر کار را جدا بپرس تا کیفیت پاسخ چند برابر شود.</p></div>
+    <div class="tip-card"><div class="ic">🎭</div><h4 data-i18n="tip3t">نقش بده، نتیجه بگیر</h4><p data-i18n="tip3p">پروتکل‌ها نقش و قوانین را به مدل تحمیل می‌کنند؛ ساده‌ترین راه برای ارتقای چشمگیر خروجی.</p></div>
+    <div class="tip-card"><div class="ic">📋</div><h4 data-i18n="tip4t">کپی مستقیم</h4><p data-i18n="tip4p">خروجی را مستقیم در System Prompt یا ابتدای چت مدل مقصد paste کن — نیاز به تغییر دیگری نیست.</p></div>
+  </section>
+
+  <footer class="foot"><span data-i18n="foot">ساخته‌شده با ❤️ برای جامعه هوش مصنوعی</span> · <b>Prompt Forge</b> 🧠</footer>
+</main>
+
+<div id="toast" role="status"></div>
+
+<script>
+(function(){
+"use strict";
+const $ = s => document.querySelector(s);
+const STORE_KEY = 'promptForgeV1';
+
+/* ==================== i18n ==================== */
+const I18N = {
+fa:{
+  docTitle:'پرامپت‌ساز حرفه‌ای — برای همه مدل‌های هوش مصنوعی',
+  brand:'پرامپت‌ساز', brandThin:'حرفه‌ای', pill1:'⚡ نسخه ۱.۰',
+  heroA:'پرامپت‌هات رو به سطح', heroB:'مهندس Principal', heroC:'ارتقا بده',
+  heroP:'پرامپت خامت رو بنویس، پروتکل رفتاری و مدل مقصد رو انتخاب کن — خروجی، یک پرامپت مهندسی‌شده و آماده کپی برای ChatGPT، Claude، Gemini و بقیه است.',
+  hc1:'📜 ۵ پروتکل تخصصی', hc2:'🤖 ۸ مدل مقصد', hc3:'🎨 حالت تصویرساز', hc4:'📊 سنجش کیفیت پرامپت',
+  secModel:'مدل مقصد', modelHint:'خروجی با فرمت بهینه همان مدل ساخته می‌شود',
+  secProtocol:'پروتکل رفتاری', protocolHint:'قوانینی که هوش مصنوعی باید رعایت کند',
+  secPrompt:'پرامپت خام شما', promptPh:'درخواستت رو اینجا بنویس... مثلاً: «یک API برای مدیریت تسک‌ها طراحی کن»',
+  secPresets:'نمونه‌های آماده', secOptions:'گزینه‌های خروجی', secImage:'تنظیمات تصویر',
+  respLang:'زبان پاسخ هوش مصنوعی', rAuto:'تشخیص خودکار', rFa:'فارسی', rEn:'English',
+  length:'طول پاسخ', lShort:'کوتاه', lMed:'متوسط', lLong:'جامع',
+  oStep:'استدلال گام‌به‌گام', oAsk:'اول سوال بپرس', oEx:'درخواست مثال', oNoFluff:'بدون حاشیه', oCode:'کد در code block',
+  imgStyle:'سبک هنری', imgLight:'نورپردازی', imgAr:'نسبت تصویر', imgParam:'نسخه مدل',
+  imgNote:'💡 پرامپت تصویر همیشه به انگلیسی ساخته می‌شود — مدل‌های تصویری با انگلیسی بهترین نتیجه را می‌دهند.',
+  hWeak:'ضعیف — جزئیات بیشتری اضافه کن', hOk:'خوب — قابل قبول', hStrong:'عالی — دقیق و کامل',
+  pvTitle:'پرامپت نهایی', copy:'📋 کپی', dl:'⬇ دانلود TXT', ready:'آماده کپی در System Prompt یا چت ✅',
+  stChars:'کاراکتر', stWords:'کلمه', stTokens:'توکن تقریبی',
+  copied:'📋 پرامپت کپی شد — حالا تو مدل مقصد paste کن!', dled:'⬇ فایل TXT دانلود شد',
+  lawsWord:'قانون',
+  ex1:'🐛 دیباگ React', ex2:'🏗 طراحی API', ex3:'✍️ پست وبلاگ', ex4:'🎨 لوگو',
+  ex1p:'اپ React من وقتی state پروفایل کاربر را آپدیت می‌کنم، بی‌نهایت re-render می‌شود. کدم این است: [کد]. مشکل کجاست؟',
+  ex2p:'یک REST API برای اپلیکیشن مدیریت تسک با احراز هویت JWT طراحی کن. کاربران، پروژه‌ها و تسک‌ها را در نظر بگیر.',
+  ex3p:'یک پست وبلاگ درباره بهره‌وری برای برنامه‌نویس‌ها بنویس. مخاطب دولوپرهای جونیور هستند و لحن صمیمی می‌خواهم.',
+  ex4p:'یک لوگو برای کافه‌ای به اسم Moon Brew طراحی کن. حس شبانه و دنج داشته باشد.',
+  tip1t:'قانون ۵W', tip1p:'در پرامپت خام مشخص کن: چه چیزی، چرا، برای چه کسی، با چه محدودیتی و چه خروجی‌ای می‌خواهی.',
+  tip2t:'یک کار در هر پرامپت', tip2p:'به جای ۵ درخواست در یک پرامپت، هر کار را جدا بپرس تا کیفیت پاسخ چند برابر شود.',
+  tip3t:'نقش بده، نتیجه بگیر', tip3p:'پروتکل‌ها نقش و قوانین را به مدل تحمیل می‌کنند؛ ساده‌ترین راه برای ارتقای چشمگیر خروجی.',
+  tip4t:'کپی مستقیم', tip4p:'خروجی را مستقیم در System Prompt یا ابتدای چت مدل مقصد paste کن — نیاز به تغییر دیگری نیست.',
+  foot:'ساخته‌شده با ❤️ برای جامعه هوش مصنوعی',
+  phTask:'[درخواست اصلی خود را اینجا بنویسید]'
+},
+en:{
+  docTitle:'Prompt Professionalizer — For Every AI Model',
+  brand:'Prompt', brandThin:'Forge Pro', pill1:'⚡ v1.0',
+  heroA:'Upgrade your prompts to', heroB:'Principal Engineer', heroC:'level',
+  heroP:'Write your raw prompt, pick a behavior protocol and target model — get an engineered, copy-paste-ready prompt for ChatGPT, Claude, Gemini and more.',
+  hc1:'📜 5 expert protocols', hc2:'🤖 8 target models', hc3:'🎨 Image mode', hc4:'📊 Prompt quality score',
+  secModel:'Target model', modelHint:'Output is formatted for that model',
+  secProtocol:'Behavior protocol', protocolHint:'Laws the AI must follow',
+  secPrompt:'Your raw prompt', promptPh:'Write your request here... e.g. "Design an API for task management"',
+  secPresets:'Quick examples', secOptions:'Output options', secImage:'Image settings',
+  respLang:'AI response language', rAuto:'Auto-detect', rFa:'فارسی', rEn:'English',
+  length:'Response length', lShort:'Short', lMed:'Medium', lLong:'Detailed',
+  oStep:'Step-by-step reasoning', oAsk:'Ask questions first', oEx:'Request examples', oNoFluff:'No fluff', oCode:'Code in fenced blocks',
+  imgStyle:'Art style', imgLight:'Lighting', imgAr:'Aspect ratio', imgParam:'Model version',
+  imgNote:'💡 Image prompts are always generated in English — image models perform best with English.',
+  hWeak:'Weak — add more detail', hOk:'Good — decent', hStrong:'Excellent — precise & complete',
+  pvTitle:'Final prompt', copy:'📋 Copy', dl:'⬇ Download TXT', ready:'Ready to paste as System Prompt ✅',
+  stChars:'chars', stWords:'words', stTokens:'~tokens',
+  copied:'📋 Prompt copied — paste it into your model!', dled:'⬇ TXT file downloaded',
+  lawsWord:'laws',
+  ex1:'🐛 React debug', ex2:'🏗 API design', ex3:'✍️ Blog post', ex4:'🎨 Logo',
+  ex1p:'My React app re-renders infinitely when I update the user profile state. Here is my code: [code]. What is wrong?',
+  ex2p:'Design a REST API for a task management app with JWT auth. Consider users, projects and tasks.',
+  ex3p:'Write a blog post about productivity for developers. The audience is junior developers and I want a friendly tone.',
+  ex4p:'Design a logo for a coffee shop called Moon Brew. It should feel nocturnal and cozy.',
+  tip1t:'The 5W Rule', tip1p:'In your raw prompt, define: what, why, for whom, with which constraints, and what output you expect.',
+  tip2t:'One job per prompt', tip2p:'Instead of 5 requests in one prompt, ask each separately — response quality multiplies.',
+  tip3t:'Give a role, get results', tip3p:'Protocols force a role and laws onto the model — the simplest way to dramatically improve output.',
+  tip4t:'Direct paste', tip4p:'Paste the output directly into the System Prompt or the start of your chat — no edits needed.',
+  foot:'Built with ❤️ for the AI community',
+  phTask:'[WRITE YOUR MAIN REQUEST HERE]'
+}
+};
+
+/* ==================== models ==================== */
+const MODELS = [
+  {id:'chatgpt', icon:'🤖', name:'ChatGPT', fmt:'md'},
+  {id:'claude',  icon:'🎭', name:'Claude',  fmt:'xml'},
+  {id:'gemini',  icon:'✨', name:'Gemini',  fmt:'md'},
+  {id:'deepseek',icon:'🐋', name:'DeepSeek',fmt:'md'},
+  {id:'llama',   icon:'🦙', name:'Llama',   fmt:'md'},
+  {id:'qwen',    icon:'🌐', name:'Qwen',    fmt:'md'},
+  {id:'midjourney',icon:'🎨',name:'Midjourney',fmt:'mj'},
+  {id:'dalle',   icon:'🖼️', name:'DALL·E',  fmt:'dalle'}
+];
+
+/* ==================== protocols ==================== */
+const PROTOCOLS = [
+{
+  id:'principal', icon:'🏛️',
+  name:{fa:'پروتکل مهندس Principal', en:'Principal Engineer Protocol'},
+  desc:{fa:'۷ قانون سخت‌گیرانه برای پاسخ‌های مهندسی دقیق، امن و بدون توهم', en:'7 strict laws for precise, secure, hallucination-free engineering answers'},
+  role:{
+    fa:'تو یک مهندس نرم‌افزار Principal با بیش از ۱۵ سال تجربه در طراحی معماری سیستم‌های بزرگ‌مقیاس و حساس به امنیت هستی.',
+    en:'You are a Principal Software Engineer with 15+ years of experience architecting large-scale, security-critical systems.'
+  },
+  laws:[
+    {t:{fa:'توهم صفر و پایبندی دقیق به واقعیت', en:'ZERO HALLUCINATION & STRICT FACTUALITY'},
+     b:{fa:'فقط حقایقی را بیان کن که کاملاً از آن‌ها مطمئن هستی. حدس نزن و هیچ API، کتابخانه یا قابلیتی را اختراع نکن. اگر واقعیت، سینتکس یا راه‌حلی را نمی‌دانی، باید صریحاً بگویی: «اطلاعات کافی برای پاسخ به این مورد را ندارم.» هرگز تظاهر به دانستن نکن.',
+        en:'You must only state facts you are absolutely certain of. Do not guess, fabricate, or invent APIs, libraries, or functionalities. If a fact, syntax, or solution is unknown to you, you must explicitly state: "I do not have enough information to answer this." Never pretend to know something you do not.'}},
+    {t:{fa:'اصل «نمی‌دانم»', en:'THE "I DON\'T KNOW" CLAUSE'},
+     b:{fa:'اعتراف به ندانستن، برتر از ارائه دروغی است که باورپذیر به نظر می‌رسد. اگر داده، زمینه یا دانش کافی نداری، باید متوقف شوی و درخواست شفاف‌سازی کنی یا محدودیت خود را بپذیری.',
+        en:'Admitting ignorance is superior to providing a plausible-sounding lie. If you lack data, context, or knowledge, you must stop and ask for clarification or admit your limitation.'}},
+    {t:{fa:'ذهنیت مهندس ارشد', en:'SENIOR ENGINEER MINDSET'},
+     b:{fa:'مثل یک مهندس نرم‌افزار Principal فکر کن. قبل از نوشتن کد، علت ریشه‌ای مشکل را تحلیل کن. حالت‌های مرزی، مقیاس‌پذیری، قابلیت نگهداری و بدهی فنی را در نظر بگیر. فقط صورت‌مسئله را درمان نکن؛ مشکل معماری زیربنایی را حل کن.',
+        en:'Think like a Principal Software Engineer. Before writing code, analyze the root cause of the problem. Consider edge cases, scalability, maintainability, and technical debt. Do not just patch the symptom; solve the underlying architectural issue.'}},
+    {t:{fa:'دکترین تکنولوژی مدرن و پایدار', en:'MODERN, STABLE TECHNOLOGY DOCTRINE'},
+     b:{fa:'تکنولوژی‌های جاری، استاندارد صنعت و پایدار را در اولویت قرار بده. از روش‌های منسوخ و قابلیت‌های آزمایشی/بتا اجتناب کن، مگر اینکه صریحاً درخواست شوند. هنگام پیشنهاد راه‌حل، مطمئن شو که نماینده بهترین رویه فعلی است (مثلاً قابلیت‌های مدرن فریم‌ورک و آخرین استانداردهای امنیتی).',
+        en:'Prioritize current, industry-standard, and stable technologies. Avoid deprecated methods and experimental/beta features unless explicitly requested. When suggesting a solution, ensure it represents the current best practice (e.g., using modern framework features, latest security standards).'}},
+    {t:{fa:'الزام امنیت-محور', en:'SECURITY-FIRST MANDATE'},
+     b:{fa:'هر راه‌حل باید با حداکثر ملاحظات امنیتی طراحی شود. به‌طور پیش‌فرض محافظت‌های OWASP Top 10 را اعمال کن. هرگز الگوهای ناامن پیشنهاد نده (مثلاً secrets هاردکدشده، ورودی‌های ضدعفونی‌نشده، الگوریتم‌های رمزنگاری ضعیف). اصول حداقل دسترسی و zero-trust باید در همه معماری‌ها اعمال شوند.',
+        en:'Every solution must be designed with maximum security in mind. Default to OWASP Top 10 protections. Never suggest insecure patterns (e.g., hardcoded secrets, unsanitized inputs, weak cryptographic algorithms). Least privilege and zero-trust principles must be applied to all architectures.'}},
+    {t:{fa:'ممنوعیت رفتار «بله‌قربان‌گو»', en:'NO "YES-MAN" BEHAVIOR'},
+     b:{fa:'اگر فرض من اشتباه است، کدم ناامن است یا رویکردم غیربهینه، موظفی به‌صورت حرفه‌ای با من مخالفت کنی. توضیح بده چرا رویکردم اشتباه است، پیامدها چیست، و جایگزین برتر را ارائه بده.',
+        en:'If my premise is flawed, my code is insecure, or my approach is suboptimal, you are required to professionally disagree with me. Explain why my approach is wrong, what the consequences are, and provide the superior alternative.'}},
+    {t:{fa:'استدلال گام‌به‌گام', en:'STEP-BY-STEP REASONING'},
+     b:{fa:'برای مسائل پیچیده، باید قبل از ارائه راه‌حل، بخش کوتاهی با عنوان «### تحلیل و رویکرد» بنویسی. فرآیند فکری، موازنه‌های بررسی‌شده و دلیل انتخاب این مسیر خاص را شرح بده. فقط پس از آن می‌توانی کد یا پاسخ نهایی را ارائه دهی.',
+        en:'For complex problems, you must output a brief "### Analysis & Approach" section before providing the solution. Detail your thought process, the tradeoffs considered, and why you chose this specific path. Only after this may you provide the code or final answer.'}}
+  ]
+},
+{
+  id:'senior', icon:'💻',
+  name:{fa:'پروتکل توسعه‌دهنده ارشد', en:'Senior Developer Protocol'},
+  desc:{fa:'کد تمیز، تست‌شده و آماده پروداکشن با توضیح «چرا»ی هر تصمیم', en:'Clean, tested, production-ready code with the "why" behind every decision'},
+  role:{
+    fa:'تو یک مهندس نرم‌افزار ارشد هستی که کد تمیز، تست‌شده و آماده پروداکشن می‌نویسد و همیشه دلیل تصمیم‌هایش را توضیح می‌دهد.',
+    en:'You are a Senior Software Engineer who writes clean, tested, production-ready code and always explains the reasoning behind decisions.'
+  },
+  laws:[
+    {t:{fa:'دکترین کد تمیز', en:'CLEAN CODE DOCTRINE'},
+     b:{fa:'کدی بنویس که انسان بتواند بخواند. اصول SOLID، DRY و KISS را رعایت کن. نام‌گذاری معنادار، توابع کوچک و مسئولیت واحد در هر تابع.',
+        en:'Write code that humans can read. Follow SOLID, DRY and KISS principles. Use meaningful names, small functions and a single responsibility per function.'}},
+    {t:{fa:'مهندسی آگاه از تست', en:'TEST-AWARE ENGINEERING'},
+     b:{fa:'حالت‌های مرزی، حالت‌های null و مسیرهای شکست را در نظر بگیر. برای منطق حیاتی، unit test پیشنهاد بده و سناریوهای تست مهم را فهرست کن.',
+        en:'Consider edge cases, null states and failure paths. Suggest unit tests for critical logic and list the important test scenarios.'}},
+    {t:{fa:'آگاهی از کارایی', en:'PERFORMANCE CONSCIOUSNESS'},
+     b:{fa:'پیچیدگی زمانی و مکانی راه‌حل را بیان کن. از بهینه‌سازی زودهنگام بپرهیز، اما تله‌های واضح کارایی مثل حلقه‌های O(n²) را علامت‌گذاری کن.',
+        en:'State the time and space complexity of the solution. Avoid premature optimization, but flag obvious performance traps like O(n²) loops.'}},
+    {t:{fa:'توضیح «چرا»', en:'EXPLAIN THE WHY'},
+     b:{fa:'هر تصمیم غیربدیهی باید یک توجیه کوتاه داشته باشد. کامنت‌ها باید «چرا» را توضیح بدهند، نه «چه چیزی» را.',
+        en:'Every non-obvious decision gets a short justification. Comments should explain "why", not "what".'}},
+    {t:{fa:'پیش‌فرض آماده پروداکشن', en:'PRODUCTION-READY DEFAULT'},
+     b:{fa:'مدیریت خطا، اعتبارسنجی ورودی و لاگینگ را به‌طور پیش‌فرض شامل کن. کد فقط-مسیر-شاد ممنوع است.',
+        en:'Include error handling, input validation and logging by default. Happy-path-only code is not acceptable.'}}
+  ]
+},
+{
+  id:'creative', icon:'✍️',
+  name:{fa:'پروتکل نویسنده خلاق', en:'Creative Writer Protocol'},
+  desc:{fa:'نوشتن با قلاب قوی، ریتم درست و کلیشه‌زدایی کامل', en:'Writing with a strong hook, proper rhythm and zero clichés'},
+  role:{
+    fa:'تو یک نویسنده و ویراستار برنده جایزه هستی با نگاهی تیز به روایت، ریتم و لحن؛ برای هر مخاطب با زبان خودش می‌نویسی.',
+    en:'You are an award-winning writer and editor with a sharp eye for story, rhythm and voice; you write for each audience in their own language.'
+  },
+  laws:[
+    {t:{fa:'قلاب در خط اول', en:'HOOK IN THE FIRST LINE'},
+     b:{fa:'از همان جمله اول توجه را جلب کن. شروع‌های کلیشه‌ای مثل «در دنیای امروز...» مطلقاً ممنوع است.',
+        en:'Grab attention from the very first sentence. Generic openings like "In today\'s world..." are strictly forbidden.'}},
+    {t:{fa:'نشان بده، نگو', en:'SHOW, DON\'T TELL'},
+     b:{fa:'به جای ادعاهای انتزاعی، از صحنه‌های ملموس، جزئیات حسی و کنش‌ها استفاده کن تا خواننده خودش نتیجه بگیرد.',
+        en:'Use concrete scenes, sensory details and actions instead of abstract claims, so the reader draws the conclusion themselves.'}},
+    {t:{fa:'تنظیم برای مخاطب', en:'AUDIENCE CALIBRATION'},
+     b:{fa:'لحن، واژگان و ریتم را دقیقاً با خواننده هدف هماهنگ کن. برای هر مخاطب، با زبان خودش بنویس.',
+        en:'Match tone, vocabulary and rhythm precisely to the target reader. Write to each audience in their own register.'}},
+    {t:{fa:'الزام اصالت', en:'ORIGINALITY MANDATE'},
+     b:{fa:'کلیشه‌ها ممنوع. استعاره‌های تازه، زاویه‌های غیرمنتظره و مثال‌های بدیع بساز.',
+        en:'Ban clichés. Invent fresh metaphors, unexpected angles and original examples.'}},
+    {t:{fa:'ویرایش بی‌رحمانه', en:'RUTHLESS EDITING'},
+     b:{fa:'حشو و کلمات پرکننده را حذف کن. هر جمله باید جایگاهش را در متن کسب کند؛ وگرنه حذف می‌شود.',
+        en:'Cut filler words. Every sentence must earn its place in the text — otherwise it is deleted.'}}
+  ]
+},
+{
+  id:'data', icon:'📊',
+  name:{fa:'پروتکل تحلیل‌گر داده', en:'Data Analyst Protocol'},
+  desc:{fa:'از داده کثیف تا تصمیم قابل‌دفاع، با دقت آماری کامل', en:'From messy data to defensible decisions, with full statistical rigor'},
+  role:{
+    fa:'تو یک تحلیل‌گر داده ارشد هستی که داده‌های نامرتب را به بینش‌های شفاف و تصمیم‌های قابل‌دفاع تبدیل می‌کند.',
+    en:'You are a Senior Data Analyst who turns messy data into clear insights and defensible decisions.'
+  },
+  laws:[
+    {t:{fa:'داده را زیر سوال ببر', en:'QUESTION THE DATA'},
+     b:{fa:'قبل از هر نتیجه‌گیری، کیفیت داده، حجم نمونه، تورش و مقادیر گمشده را بررسی کن. داده بد، نتیجه بد است.',
+        en:'Before any conclusion, check data quality, sample size, bias and missing values. Bad data means bad conclusions.'}},
+    {t:{fa:'دقت آماری', en:'STATISTICAL RIGOR'},
+     b:{fa:'فرضیات، سطح اطمینان و اندازه اثر را صریحاً بیان کن. p-hacking و انتخاب گزینشی نتایج مطلقاً ممنوع است.',
+        en:'State assumptions, confidence levels and effect sizes explicitly. P-hacking and cherry-picking results are strictly forbidden.'}},
+    {t:{fa:'همبستگی ≠ علیت', en:'CORRELATION ≠ CAUSATION'},
+     b:{fa:'ارتباط مشاهده‌شده بین متغیرها را صریحاً از ادعای علّی جدا کن و در صورت وجود، متغیرهای مخدوش‌کننده را نام ببر.',
+        en:'Explicitly separate observed association between variables from causal claims, and name confounders when present.'}},
+    {t:{fa:'اول تصویرسازی', en:'VISUAL FIRST'},
+     b:{fa:'برای هر بینش، نوع نمودار مناسب را پیشنهاد بده و دلیل انتخاب آن را توضیح بده.',
+        en:'Recommend the right chart type for each insight and explain why that chart fits.'}},
+    {t:{fa:'خروجی عملیاتی', en:'ACTIONABLE OUTPUT'},
+     b:{fa:'تحلیل را با توصیه‌های مشخص، اولویت‌بندی‌شده و قابل اجرا تمام کن، نه با جملات کلی.',
+        en:'End the analysis with concrete, prioritized, executable recommendations — not generic statements.'}}
+  ]
+},
+{
+  id:'research', icon:'🔬',
+  name:{fa:'پروتکل تحقیق عمیق', en:'Deep Research Protocol'},
+  desc:{fa:'جمع‌بندی بی‌طرفانه منابع با شفافیت کامل درباره عدم قطعیت', en:'Neutral source synthesis with full uncertainty transparency'},
+  role:{
+    fa:'تو یک تحلیل‌گر تحقیق عمیق هستی که منابع متعدد را به بریفینگ‌های دقیق، ساختاریافته و بی‌طرفانه ترکیب می‌کند.',
+    en:'You are a Deep Research Analyst who synthesizes multiple sources into rigorous, structured, neutral briefings.'
+  },
+  laws:[
+    {t:{fa:'انضباط منبع', en:'SOURCE DISCIPLINE'},
+     b:{fa:'منابع دست‌اول و معتبر را ترجیح بده. هر ادعای غیرقابل راستی‌آزمایی باید صریحاً علامت‌گذاری شود.',
+        en:'Prefer primary, reputable sources. Any unverifiable claim must be explicitly flagged.'}},
+    {t:{fa:'قوی‌ترین روایت همه طرف‌ها', en:'STEELMAN ALL SIDES'},
+     b:{fa:'قوی‌ترین نسخه دیدگاه‌های مخالف را ارائه بده، نه نسخه ضعیف و کاریکاتوری آن‌ها.',
+        en:'Present the strongest version of opposing views, not a weak or caricatured one.'}},
+    {t:{fa:'شفافیت عدم قطعیت', en:'UNCERTAINTY TRANSPARENCY'},
+     b:{fa:'سطح اطمینان هر نتیجه را مشخص کن: بالا / متوسط / پایین — همراه با استدلال آن سطح.',
+        en:'Quantify the confidence of each finding: high / medium / low — with the reasoning behind that level.'}},
+    {t:{fa:'ارائه ساختاریافته', en:'STRUCTURED DELIVERY'},
+     b:{fa:'خروجی را با این ساختار ارائه بده: خلاصه مدیریتی ← یافته‌های کلیدی ← شواهد ← سوالات باز.',
+        en:'Deliver in this structure: executive summary → key findings → evidence → open questions.'}},
+    {t:{fa:'بررسی تازگی', en:'RECENCY CHECK'},
+     b:{fa:'تاریخ منابع را ذکر کن و درباره اطلاعات قدیمی یا منسوخ‌شده صریحاً هشدار بده.',
+        en:'Note the date of sources and explicitly warn about outdated or superseded information.'}}
+  ]
+}
+];
+
+/* ==================== constraints / formats ==================== */
+const CNST = {
+  step:{fa:'گام‌به‌گام فکر کن و پیش از پاسخ نهایی، روند استدلال خود را نشان بده.', en:'Think step-by-step and show your reasoning before the final answer.'},
+  ask:{fa:'پیش از پاسخ، اگر جزئیات حیاتی کم است، حداکثر ۳ سوال شفاف‌ساز بپرس.', en:'Before answering, ask up to 3 clarifying questions if any critical detail is missing.'},
+  ex:{fa:'برای هر نکته کلیدی، حداقل یک مثال ملموس بیاور.', en:'Include at least one concrete example for each key point.'},
+  nofluff:{fa:'مستقیم باش؛ عبارات پرکننده، مقدمه‌های کلیشه‌ای و خلاصه‌کردن سوال من ممنوع.', en:'Be direct. No filler phrases, no generic introductions, no restating of my question.'}
+};
+const LEN = {
+  short:{fa:'پاسخ را فشرده نگه دار — حداکثر ۳۰۰ کلمه.', en:'Keep the response concise — max 300 words.'},
+  medium:{fa:'پاسخی متعادل و ساختاریافته ارائه بده.', en:'Aim for a balanced, well-structured response.'},
+  long:{fa:'جامع باش؛ حالت‌های مرزی، جایگزین‌ها و جزئیات عمیق فنی را پوشش بده.', en:'Be exhaustive. Cover edge cases, alternatives and deep technical detail.'}
+};
+
+/* ==================== image data ==================== */
+const IMG_STYLES = [
+  ['cinematic','سینمایی'],['photorealistic','فوتoreal'.replace('fotoreal','فوتورئال')],['anime','انیمه'],['3d render','رندر سه‌بعدی'],
+  ['watercolor','آبرنگ'],['cyberpunk','سایبرپانک'],['minimalist','مینیمال'],['oil painting','رنگ روغن'],
+  ['isometric','ایزومتریک'],['pixel art','پیکسل آرت']
+];
+const IMG_LIGHTS = [
+  ['golden hour','ساعت طلایی'],['neon glow','نئون'],['soft studio','استودیویی نرم'],
+  ['dramatic shadows','سایه‌های دراماتیک'],['volumetric fog','مه حجمی'],['natural daylight','نور طبیعی']
+];
+const IMG_ARS = ['16:9','1:1','9:16','4:5','3:2','21:9'];
+const IMG_VERS = ['--v 6.1','--v 6','--niji 6'];
+
+/* ==================== state ==================== */
+const DEFAULTS = {
+  uiLang:'fa', model:'chatgpt', protocol:'principal', raw:'',
+  respLang:'auto', length:'medium',
+  opts:{step:true, ask:false, ex:false, nofluff:true, code:true},
+  img:{styles:['cinematic'], light:'golden hour', ar:'16:9', ver:'--v 6.1'}
+};
+let state = JSON.parse(JSON.stringify(DEFAULTS));
+let genTimer = null;
+
+/* ==================== helpers ==================== */
+const T = () => I18N[state.uiLang];
+const nf = n => Number(n).toLocaleString(state.uiLang==='fa' ? 'fa-IR' : 'en-US');
+
+function detectLang(s){
+  const fa = (s.match(/[\u0600-\u06FF]/g)||[]).length;
+  return fa >= 3 ? 'fa' : 'en';
+}
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(()=>t.classList.remove('show'),2400);
+}
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){}
+}
+function load(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return false;
+    const s = JSON.parse(raw);
+    state = Object.assign(JSON.parse(JSON.stringify(DEFAULTS)), s);
+    state.opts = Object.assign({}, DEFAULTS.opts, s.opts||{});
+    state.img = Object.assign({}, DEFAULTS.img, s.img||{});
+    return true;
+  }catch(e){ return false; }
+}
+
+/* ==================== i18n apply ==================== */
+function applyI18n(){
+  const t = T();
+  document.documentElement.lang = state.uiLang;
+  document.documentElement.dir = state.uiLang==='fa' ? 'rtl' : 'ltr';
+  document.title = t.docTitle;
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const k = el.dataset.i18n;
+    if(t[k] !== undefined) el.textContent = t[k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const k = el.dataset.i18nPh;
+    if(t[k] !== undefined) el.placeholder = t[k];
+  });
+  $('#langFa').classList.toggle('active', state.uiLang==='fa');
+  $('#langEn').classList.toggle('active', state.uiLang==='en');
+}
+
+/* ==================== dynamic UI ==================== */
+function renderModels(){
+  const el = $('#modelGrid'); el.innerHTML = '';
+  MODELS.forEach(m=>{
+    const b = document.createElement('button');
+    b.type='button';
+    b.className = 'mchip' + (state.model===m.id ? ' on' : '');
+    b.innerHTML = '<span class="em">'+m.icon+'</span>'+m.name;
+    b.addEventListener('click',()=>{ state.model = m.id; save(); renderModels(); updatePanels(); generate(); });
+    el.appendChild(b);
+  });
+}
+function renderProtocols(){
+  const el = $('#protoList'); el.innerHTML = '';
+  const t = T();
+  PROTOCOLS.forEach(p=>{
+    const b = document.createElement('button');
+    b.type='button';
+    b.className = 'pcard' + (state.protocol===p.id ? ' on' : '');
+    b.innerHTML =
+      '<span class="pic">'+p.icon+'</span>' +
+      '<span><span class="pname">'+p.name[state.uiLang]+'</span>' +
+      '<span class="pdesc" style="display:block">'+p.desc[state.uiLang]+'</span>' +
+      '<span class="plaws">'+p.laws.length+' '+(state.uiLang==='fa' ? 'قانون' : t.lawsWord)+'</span></span>';
+    b.addEventListener('click',()=>{ state.protocol = p.id; save(); renderProtocols(); generate(); });
+    el.appendChild(b);
+  });
+}
+function renderPresets(){
+  const el = $('#presetRow'); el.innerHTML = '';
+  const t = T();
+  [1,2,3,4].forEach(i=>{
+    const b = document.createElement('button');
+    b.type='button'; b.className='preset';
+    b.textContent = t['ex'+i];
+    b.addEventListener('click',()=>{
+      $('#rawText').value = t['ex'+i+'p'];
+      state.raw = t['ex'+i+'p'];
+      save(); updateHealth(); generate();
+      $('#rawText').focus();
+    });
+    el.appendChild(b);
+  });
+}
+function renderImgChips(){
+  const sEl = $('#styleChips'); sEl.innerHTML = '';
+  IMG_STYLES.forEach(([k,fa])=>{
+    const b = document.createElement('button');
+    b.type='button';
+    b.className = 'chip' + (state.img.styles.includes(k) ? ' on' : '');
+    b.textContent = state.uiLang==='fa' ? fa : k;
+    b.addEventListener('click',()=>{
+      const i = state.img.styles.indexOf(k);
+      if(i>-1) state.img.styles.splice(i,1); else state.img.styles.push(k);
+      save(); renderImgChips(); generate();
+    });
+    sEl.appendChild(b);
+  });
+  const lEl = $('#lightChips'); lEl.innerHTML = '';
+  IMG_LIGHTS.forEach(([k,fa])=>{
+    const b = document.createElement('button');
+    b.type='button';
+    b.className = 'chip' + (state.img.light===k ? ' on' : '');
+    b.textContent = state.uiLang==='fa' ? fa : k;
+    b.addEventListener('click',()=>{ state.img.light = k; save(); renderImgChips(); generate(); });
+    lEl.appendChild(b);
+  });
+  const aEl = $('#arChips'); aEl.innerHTML = '';
+  IMG_ARS.forEach(k=>{
+    const b = document.createElement('button');
+    b.type='button';
+    b.className = 'chip' + (state.img.ar===k ? ' on' : '');
+    b.textContent = k; b.style.direction='ltr';
+    b.addEventListener('click',()=>{ state.img.ar = k; save(); renderImgChips(); generate(); });
+    aEl.appendChild(b);
+  });
+  const vEl = $('#verChips'); vEl.innerHTML = '';
+  IMG_VERS.forEach(k=>{
+    const b = document.createElement('button');
+    b.type='button';
+    b.className = 'chip' + (state.img.ver===k ? ' on' : '');
+    b.textContent = k; b.style.direction='ltr';
+    b.addEventListener('click',()=>{ state.img.ver = k; save(); renderImgChips(); generate(); });
+    vEl.appendChild(b);
+  });
+}
+function updatePanels(){
+  const m = MODELS.find(x=>x.id===state.model);
+  const isImg = m.fmt==='mj' || m.fmt==='dalle';
+  $('#protoSec').hidden = isImg;
+  $('#textOptsSec').hidden = isImg;
+  $('#imgSec').hidden = !isImg;
+}
+function syncControls(){
+  $('#rawText').value = state.raw;
+  document.querySelectorAll('#respSeg button').forEach(b=>b.classList.toggle('active', b.dataset.val===state.respLang));
+  document.querySelectorAll('#lenSeg button').forEach(b=>b.classList.toggle('active', b.dataset.val===state.length));
+  document.querySelectorAll('[data-opt]').forEach(inp=>{ inp.checked = !!state.opts[inp.dataset.opt]; });
+}
+function renderDynamic(){
+  renderModels(); renderProtocols(); renderPresets(); renderImgChips();
+  updatePanels(); syncControls(); updateHealth(); generate();
+}
+
+/* ==================== health ==================== */
+function scorePrompt(s){
+  let sc = 0;
+  const len = s.trim().length;
+  if(len >= 30) sc += 30; else if(len >= 10) sc += 15;
+  if(/[؟?]/.test(s) || /\b(what|how|why|design|write|create|build|fix|explain|analyze)\b/i.test(s) || /(بنویس|طراحی|بساز|درست کن|توضیح|تحلیل|رفع)/.test(s)) sc += 20;
+  if(/\b(because|for|in order to|using|with|audience)\b/i.test(s) || /(برای|چون|به منظور|با استفاده|از طریق|مخاطب)/.test(s)) sc += 25;
+  if(/\b(format|tone|words|length|style|output)\b/i.test(s) || /(فرمت|لحن|کلمه|طول|سبک|خروجی)/.test(s)) sc += 25;
+  return Math.min(100, sc);
+}
+function updateHealth(){
+  const sc = scorePrompt(state.raw);
+  const t = T();
+  const bar = $('#healthBar').querySelector('i');
+  bar.style.width = sc + '%';
+  let color, label;
+  if(sc < 40){ color = 'linear-gradient(90deg,#ef4444,#f59e0b)'; label = t.hWeak; }
+  else if(sc < 70){ color = 'linear-gradient(90deg,#f59e0b,#facc15)'; label = t.hOk; }
+  else { color = 'linear-gradient(90deg,#34d399,#22c55e)'; label = t.hStrong; }
+  bar.style.background = color;
+  $('#healthLabel').textContent = nf(sc) + '٪ · ' + label;
+}
+
+/* ==================== generator ==================== */
+function buildText(model){
+  const S = state.uiLang;
+  const t = T();
+  const raw = state.raw.trim() || t.phTask;
+  const p = PROTOCOLS.find(x=>x.id===state.protocol);
+  const resp = state.respLang==='auto' ? detectLang(state.raw) : state.respLang;
+
+  const intro = S==='fa' ? 'باید به‌طور دقیق از قوانین زیر پیروی کنی:' : 'You must strictly adhere to the following laws:';
+  const laws = p.laws.map((l,i)=> S==='fa'
+    ? '**قانون ' + (i+1) + ': ' + l.t.fa + '**\n' + l.b.fa
+    : '**LAW ' + (i+1) + ': ' + l.t.en + '**\n' + l.b.en
+  ).join('\n\n');
+
+  const rules = [];
+  if(state.opts.step) rules.push(CNST.step[S]);
+  if(state.opts.ask) rules.push(CNST.ask[S]);
+  if(state.opts.ex) rules.push(CNST.ex[S]);
+  if(state.opts.nofluff) rules.push(CNST.nofluff[S]);
+  rules.push(resp==='fa' ? 'به زبان فارسی پاسخ بده.' : 'Respond in English.');
+
+  const fmt = [];
+  fmt.push(S==='fa'
+    ? 'پاسخ را با هدینگ‌های واضح، لیست‌های نشانه‌دار و پاراگراف‌های کوتاه ساختار بده.'
+    : 'Structure the answer with clear headers, bullet points and short paragraphs.');
+  if(state.opts.code) fmt.push(S==='fa'
+    ? 'همه کدها را داخل fenced code block با ذکر زبان قرار بده.'
+    : 'Put all code inside fenced code blocks with the language specified.');
+  fmt.push(LEN[state.length][S]);
+
+  if(model.fmt==='xml'){
+    return [
+      '<role>', p.role[S], '</role>', '',
+      '<protocol name="' + p.name.en + '">', intro, '', laws.replace(/\*\*/g,''), '</protocol>', '',
+      '<task>', raw, '</task>', '',
+      '<constraints>', rules.map(r=>'- '+r).join('\n'), '</constraints>', '',
+      '<output_format>', fmt.map(f=>'- '+f).join('\n'), '</output_format>'
+    ].join('\n');
+  }
+  const H = S==='fa'
+    ? {role:'🎭 نقش', proto:'📜 پروتکل', task:'🎯 وظیفه', rules:'⚙️ قوانین و محدودیت‌ها', out:'📤 فرمت خروجی'}
+    : {role:'🎭 ROLE', proto:'📜 PROTOCOL', task:'🎯 TASK', rules:'⚙️ RULES & CONSTRAINTS', out:'📤 OUTPUT FORMAT'};
+  return [
+    '# ' + H.role, p.role[S], '',
+    '# ' + H.proto + ' — ' + p.name[S], intro, '', laws, '',
+    '# ' + H.task, raw, '',
+    '# ' + H.rules, rules.map(r=>'- '+r).join('\n'), '',
+    '# ' + H.out, fmt.map(f=>'- '+f).join('\n')
+  ].join('\n');
+}
+function buildMJ(){
+  const raw = state.raw.trim() || 'a majestic mountain landscape at dawn';
+  const parts = [raw];
+  if(state.img.styles.length) parts.push(state.img.styles.join(', '));
+  if(state.img.light) parts.push(state.img.light + ' lighting');
+  parts.push('highly detailed, 8k, masterpiece');
+  return parts.join(', ') + ' --ar ' + state.img.ar + ' ' + state.img.ver + ' --style raw --q 2';
+}
+function buildDalle(){
+  const raw = state.raw.trim() || 'a majestic mountain landscape at dawn';
+  const style = state.img.styles.length ? state.img.styles.join(', ') : 'photorealistic';
+  return 'Create a high-quality image: ' + raw + '. Art style: ' + style +
+    '. Lighting: ' + (state.img.light || 'natural daylight') +
+    '. Rich detail, professional composition, 8K resolution.';
+}
+function generate(){
+  const t = T();
+  const m = MODELS.find(x=>x.id===state.model);
+  let out = '';
+  if(m.fmt==='mj') out = buildMJ();
+  else if(m.fmt==='dalle') out = buildDalle();
+  else out = buildText(m);
+
+  $('#outPre').textContent = out;
+  const chars = out.length;
+  const words = out.trim() ? out.trim().split(/\s+/).length : 0;
+  const tokens = Math.ceil(chars/4);
+  $('#statLine').innerHTML = '<b>'+nf(chars)+'</b> '+t.stChars+' · <b>'+nf(words)+'</b> '+t.stWords+' · <b>'+nf(tokens)+'</b> '+t.stTokens;
+}
+function scheduleGenerate(){ clearTimeout(genTimer); genTimer = setTimeout(generate, 140); }
+
+/* ==================== actions ==================== */
+async function copyOut(){
+  const txt = $('#outPre').textContent;
+  try{ await navigator.clipboard.writeText(txt); }
+  catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); }catch(_){}
+    ta.remove();
+  }
+  toast(T().copied);
+}
+function downloadOut(){
+  const blob = new Blob([$('#outPre').textContent],{type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'prompt.txt';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),800);
+  toast(T().dled);
+}
+function setLang(lang){
+  state.uiLang = lang; save();
+  applyI18n(); renderDynamic();
+}
+
+/* ==================== bindings ==================== */
+$('#langFa').addEventListener('click',()=>setLang('fa'));
+$('#langEn').addEventListener('click',()=>setLang('en'));
+
+$('#rawText').addEventListener('input',e=>{
+  state.raw = e.target.value; save(); updateHealth(); scheduleGenerate();
+});
+
+document.querySelectorAll('#respSeg button').forEach(b=>
+  b.addEventListener('click',()=>{ state.respLang = b.dataset.val; save(); syncControls(); generate(); }));
+document.querySelectorAll('#lenSeg button').forEach(b=>
+  b.addEventListener('click',()=>{ state.length = b.dataset.val; save(); syncControls(); generate(); }));
+document.querySelectorAll('[data-opt]').forEach(inp=>
+  inp.addEventListener('change',()=>{ state.opts[inp.dataset.opt] = inp.checked; save(); generate(); }));
+
+$('#copyBtn').addEventListener('click',copyOut);
+$('#dlBtn').addEventListener('click',downloadOut);
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); downloadOut(); }
+});
+
+/* ==================== init ==================== */
+const restored = load();
+if(!restored){ state.raw = I18N.fa.ex2p; }
+applyI18n();
+renderDynamic();
+})();
+</script>
+</body>
+</html>
